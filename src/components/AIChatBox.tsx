@@ -60,7 +60,7 @@ export default function AIChatBox({ open, onClose }: AIChatBoxProps) {
             <ChatMessage
               message={{
                 role: "assistant",
-                content: "Thinking for the correct answer",
+                content: "Thinking for the correct answer...",
               }}
             />
           )}

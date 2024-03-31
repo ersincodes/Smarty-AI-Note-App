@@ -1,4 +1,4 @@
-import { notesIndex } from "@/lib/db/picone";
+import { notesIndex } from "@/lib/db/pinecone";
 import prisma from "@/lib/db/prisma";
 import { getEmbedding } from "@/lib/openai";
 import {
@@ -19,7 +19,7 @@ export async function POST(req: Request) {
       return Response.json({ error: "Invalid input" }, { status: 400 });
     }
 
-    const { title, content } = parseResult.data;
+    const { title, content, categoryId } = parseResult.data;
 
     const { userId } = auth();
 
@@ -35,6 +35,7 @@ export async function POST(req: Request) {
           title,
           content,
           userId,
+          categoryId,
         },
       });
 
@@ -66,7 +67,7 @@ export async function PUT(req: Request) {
       return Response.json({ error: "Invalid input" }, { status: 400 });
     }
 
-    const { id, title, content } = parseResult.data;
+    const { id, title, content, categoryId } = parseResult.data;
 
     const note = await prisma.note.findUnique({ where: { id } });
 
@@ -85,7 +86,7 @@ export async function PUT(req: Request) {
     const updatedNote = await prisma.$transaction(async (tx) => {
       const updatedNote = await tx.note.update({
         where: { id },
-        data: { title, content },
+        data: { title, content, categoryId },
       });
       await notesIndex.upsert([
         { id, values: embedding, metadata: { userId } },

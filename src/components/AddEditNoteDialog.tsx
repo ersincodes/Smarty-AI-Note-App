@@ -22,8 +22,18 @@ import {
   DialogHeader,
   DialogTitle,
 } from "./ui/dialog";
-import { Note } from "@prisma/client";
-import { useState } from "react";
+import { Note, Category } from "@prisma/client";
+import { useEffect, useState } from "react";
+import {
+  Select,
+  SelectContent,
+  SelectGroup,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import { SelectLabel } from "@radix-ui/react-select";
+import { Controller } from "react-hook-form";
 
 interface AddEditNoteDialogProps {
   open: boolean;
@@ -37,6 +47,7 @@ export default function AddEditNoteDialog({
   noteToEdit,
 }: AddEditNoteDialogProps) {
   const [deleteInProgress, setDeleteInProgress] = useState(false);
+  const [categories, setCategories] = useState<Category[]>([]);
 
   const router = useRouter();
 
@@ -109,6 +120,20 @@ export default function AddEditNoteDialog({
     }
   }
 
+  useEffect(() => {
+    const fetchCategories = async () => {
+      const response = await fetch("/api/categories");
+      if (response.ok) {
+        const data = await response.json();
+        setCategories(data.categories);
+      }
+    };
+
+    if (open) {
+      fetchCategories();
+    }
+  }, [open]);
+
   return (
     <Dialog open={open} onOpenChange={setOpen}>
       <DialogContent>
@@ -117,6 +142,37 @@ export default function AddEditNoteDialog({
         </DialogHeader>
         <Form {...form}>
           <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-3">
+            <Controller
+              control={form.control}
+              name="categoryId"
+              render={({ field }) => (
+                <FormItem>
+                  <FormControl>
+                    <Select
+                      onValueChange={(value) => {
+                        field.onChange(value === "none" ? null : value);
+                      }}
+                      value={field.value || "none"}
+                    >
+                      <SelectTrigger className="w-full">
+                        <SelectValue placeholder="Select a category" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectGroup>
+                          <SelectLabel>Category</SelectLabel>
+                          <SelectItem value="none">None</SelectItem>
+                          {categories.map((category) => (
+                            <SelectItem key={category.id} value={category.id}>
+                              {category.name}
+                            </SelectItem>
+                          ))}
+                        </SelectGroup>
+                      </SelectContent>
+                    </Select>
+                  </FormControl>
+                </FormItem>
+              )}
+            />
             <FormField
               control={form.control}
               name="title"

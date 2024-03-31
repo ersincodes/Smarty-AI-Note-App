@@ -1,4 +1,4 @@
-import { notesIndex } from "@/lib/db/picone";
+import { notesIndex } from "@/lib/db/pinecone";
 import prisma from "@/lib/db/prisma";
 import openai, { getEmbedding } from "@/lib/openai";
 import { auth } from "@clerk/nextjs";
@@ -37,7 +37,7 @@ export async function POST(req: Request) {
     const systemMessage: ChatCompletionMessage = {
       role: "assistant",
       content:
-        "You are an intelligent note-takin app. You answer the user's questions based on their existing notes." +
+        "You are an intelligent note-taking app. You answer the user's questions based on their existing notes." +
         "The relevant notes for this query are:\n" +
         relevantNotes
           .map((note) => `Title:${note.title}\n\nContent:\n${note.content}`)

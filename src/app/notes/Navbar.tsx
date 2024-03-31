@@ -13,10 +13,14 @@ import { dark } from "@clerk/themes";
 import { useTheme } from "next-themes";
 
 import AIChatButton from "@/components/AIChatButton";
+import CreateCategoryDialog from "@/components/CreateCategoryDialog";
 
 export default function Navbar() {
   const { theme } = useTheme();
   const [showAddEditNoteDialog, setShowAddEditNoteDialog] = useState(false);
+  const [showCreateCategoryDialog, setShowCreateCategoryDialog] =
+    useState(false);
+
   return (
     <>
       <div className="p-4 shadow">
@@ -34,6 +38,10 @@ export default function Navbar() {
               }}
             />
             <ThemeToggleButton />
+            <Button onClick={() => setShowCreateCategoryDialog(true)}>
+              <Plus size={20} className="mr-2" />
+              Create Category
+            </Button>
             <Button onClick={() => setShowAddEditNoteDialog(true)}>
               <Plus size={20} className="mr-2" />
               Add Note
@@ -42,6 +50,12 @@ export default function Navbar() {
           </div>
         </div>
       </div>
+      {showCreateCategoryDialog && (
+        <CreateCategoryDialog
+          open={showCreateCategoryDialog}
+          setOpen={setShowCreateCategoryDialog}
+        />
+      )}
       <AddNoteDialog
         open={showAddEditNoteDialog}
         setOpen={setShowAddEditNoteDialog}

@@ -12,7 +12,12 @@ export default async function NotesPage() {
 
   if (!userId) throw Error("userId undefined");
 
-  const allNotes = await prisma.note.findMany({ where: { userId } });
+  const allNotes = await prisma.note.findMany({
+    where: { userId },
+    include: {
+      category: true,
+    },
+  });
 
   return (
     <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">

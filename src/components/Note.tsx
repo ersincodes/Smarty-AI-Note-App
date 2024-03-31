@@ -1,6 +1,6 @@
 "use client";
 
-import { Note as NoteModel } from "@prisma/client";
+import React, { useState } from "react";
 import {
   Card,
   CardContent,
@@ -8,18 +8,31 @@ import {
   CardHeader,
   CardTitle,
 } from "./ui/card";
-import { useState } from "react";
 import AddEditNoteDialog from "./AddEditNoteDialog";
+import { Note } from "@prisma/client";
+
+export type NoteWithCategory = Note & {
+  category: {
+    name: string;
+  } | null;
+};
 
 interface NoteProps {
-  note: NoteModel;
+  note: NoteWithCategory;
 }
 
-export default function Note({ note }: NoteProps) {
+export default function NoteComponent({ note }: NoteProps) {
   const [showEditDialog, setShowEditDialog] = useState(false);
+  const [isExpanded, setIsExpanded] = useState(false);
+
+  const maxContentLength = 150;
+  const shouldShowMoreButton =
+    note.content && note.content.length > maxContentLength;
+  const displayContent = isExpanded
+    ? note.content
+    : note.content?.substring(0, maxContentLength) + "...";
 
   const wasUpdated = note.updatedAt > note.createdAt;
-
   const createdUpdatedAtTimeStamp = (
     wasUpdated ? note.updatedAt : note.createdAt
   ).toDateString();
@@ -27,18 +40,31 @@ export default function Note({ note }: NoteProps) {
   return (
     <>
       <Card
-        className="cursor-pointer transition-shadow hover:shadow-lg"
+        className="relative cursor-pointer transition-shadow hover:shadow-lg"
         onClick={() => setShowEditDialog(true)}
       >
         <CardHeader>
           <CardTitle>{note.title}</CardTitle>
           <CardDescription>
+            Category: {note.category ? note.category.name : "No Category"}
+            <br />
             {createdUpdatedAtTimeStamp}
-            {wasUpdated && "(updated)"}
+            {wasUpdated && " (updated)"}
           </CardDescription>
         </CardHeader>
         <CardContent>
-          <p className="whitespace-pre-line">{note.content}</p>
+          <p className="whitespace-pre-line">{displayContent}</p>
+          {shouldShowMoreButton && (
+            <button
+              className="mt-2 text-sm text-blue-500"
+              onClick={(e) => {
+                e.stopPropagation(); // Prevent triggering the card's onClick
+                setIsExpanded(!isExpanded);
+              }}
+            >
+              {isExpanded ? "Show Less" : "Show More"}
+            </button>
+          )}
         </CardContent>
       </Card>
       <AddEditNoteDialog

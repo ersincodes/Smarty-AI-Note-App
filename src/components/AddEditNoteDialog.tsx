@@ -55,7 +55,8 @@ export default function AddEditNoteDialog({
     resolver: zodResolver(createNoteSchema),
     defaultValues: {
       title: noteToEdit?.title || "",
-      content: noteToEdit?.title || "",
+      content: noteToEdit?.content || "",
+      categoryId: noteToEdit?.categoryId?.toString() || "none",
     },
   });
 
@@ -135,93 +136,99 @@ export default function AddEditNoteDialog({
   }, [open]);
 
   return (
-    <Dialog open={open} onOpenChange={setOpen}>
-      <DialogContent>
-        <DialogHeader>
-          <DialogTitle>{noteToEdit ? "Edit Note" : "Add Note"}</DialogTitle>
-        </DialogHeader>
-        <Form {...form}>
-          <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-3">
-            <Controller
-              control={form.control}
-              name="categoryId"
-              render={({ field }) => (
-                <FormItem>
-                  <FormControl>
-                    <Select
-                      onValueChange={(value) => {
-                        field.onChange(value === "none" ? null : value);
-                      }}
-                      value={field.value || "none"}
-                    >
-                      <SelectTrigger className="w-full">
-                        <SelectValue placeholder="Select a category" />
-                      </SelectTrigger>
-                      <SelectContent>
-                        <SelectGroup>
-                          <SelectLabel>Category</SelectLabel>
-                          <SelectItem value="none">None</SelectItem>
-                          {categories.map((category) => (
-                            <SelectItem key={category.id} value={category.id}>
-                              {category.name}
-                            </SelectItem>
-                          ))}
-                        </SelectGroup>
-                      </SelectContent>
-                    </Select>
-                  </FormControl>
-                </FormItem>
-              )}
-            />
-            <FormField
-              control={form.control}
-              name="title"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>Note Title</FormLabel>
-                  <FormControl>
-                    <Input placeholder="Note title" {...field} />
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-            <FormField
-              control={form.control}
-              name="content"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>Note Content</FormLabel>
-                  <FormControl>
-                    <Textarea placeholder="Note content" {...field} />
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-            <DialogFooter className="gap-1 sm:gap-0">
-              {noteToEdit && (
+    <div className="flex max-h-full flex-col">
+      <Dialog open={open} onOpenChange={setOpen}>
+        <DialogContent className="max-w-full">
+          <DialogHeader>
+            <DialogTitle>{noteToEdit ? "Edit Note" : "Add Note"}</DialogTitle>
+          </DialogHeader>
+          <Form {...form}>
+            <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-3">
+              <Controller
+                control={form.control}
+                name="categoryId"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormControl>
+                      <Select
+                        onValueChange={(value) => {
+                          field.onChange(value === "none" ? null : value);
+                        }}
+                        value={field.value || "none"}
+                      >
+                        <SelectTrigger className="w-full">
+                          <SelectValue placeholder="Select a category" />
+                        </SelectTrigger>
+                        <SelectContent>
+                          <SelectGroup>
+                            <SelectLabel>Category</SelectLabel>
+                            <SelectItem value="none">None</SelectItem>
+                            {categories.map((category) => (
+                              <SelectItem
+                                key={category.id}
+                                value={category.id.toString()}
+                              >
+                                {category.name}
+                              </SelectItem>
+                            ))}
+                          </SelectGroup>
+                        </SelectContent>
+                      </Select>
+                    </FormControl>
+                  </FormItem>
+                )}
+              />
+
+              <FormField
+                control={form.control}
+                name="title"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Note Title</FormLabel>
+                    <FormControl>
+                      <Input placeholder="Note title" {...field} />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+              <FormField
+                control={form.control}
+                name="content"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Note Content</FormLabel>
+                    <FormControl>
+                      <Textarea placeholder="Note content" {...field} />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+              <DialogFooter className="gap-1 sm:gap-0">
+                {noteToEdit && (
+                  <LoadingButton
+                    variant="destructive"
+                    loading={deleteInProgress}
+                    disabled={form.formState.isSubmitting}
+                    onClick={deleteNote}
+                    type="button"
+                  >
+                    Delete Note
+                  </LoadingButton>
+                )}
                 <LoadingButton
-                  variant="destructive"
-                  loading={deleteInProgress}
-                  disabled={form.formState.isSubmitting}
-                  onClick={deleteNote}
-                  type="button"
+                  type="submit"
+                  loading={form.formState.isSubmitting}
+                  disabled={deleteInProgress}
                 >
-                  Delete Note
+                  Submit
                 </LoadingButton>
-              )}
-              <LoadingButton
-                type="submit"
-                loading={form.formState.isSubmitting}
-                disabled={deleteInProgress}
-              >
-                Submit
-              </LoadingButton>
-            </DialogFooter>
-          </form>
-        </Form>
-      </DialogContent>
-    </Dialog>
+              </DialogFooter>
+            </form>
+          </Form>
+        </DialogContent>
+      </Dialog>
+    </div>
   );
 }

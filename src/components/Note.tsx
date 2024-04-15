@@ -10,6 +10,7 @@ import {
 } from "./ui/card";
 import AddEditNoteDialog from "./AddEditNoteDialog";
 import { Note } from "@prisma/client";
+import { formatDate } from "@/lib/utils";
 
 export type NoteWithCategory = Note & {
   category: {
@@ -33,9 +34,9 @@ export default function NoteComponent({ note }: NoteProps) {
     : note.content?.substring(0, maxContentLength) + "...";
 
   const wasUpdated = note.updatedAt > note.createdAt;
-  const createdUpdatedAtTimeStamp = (
-    wasUpdated ? note.updatedAt : note.createdAt
-  ).toDateString();
+  const createdUpdatedAtTimeStamp = formatDate(
+    new Date(wasUpdated ? note.updatedAt : note.createdAt),
+  );
 
   return (
     <>
@@ -58,7 +59,7 @@ export default function NoteComponent({ note }: NoteProps) {
             <button
               className="mt-2 text-sm text-blue-500"
               onClick={(e) => {
-                e.stopPropagation(); // Prevent triggering the card's onClick
+                e.stopPropagation();
                 setIsExpanded(!isExpanded);
               }}
             >

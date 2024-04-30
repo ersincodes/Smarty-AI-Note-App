@@ -2,8 +2,6 @@ import Note from "@/components/Note";
 import prisma from "@/lib/db/prisma";
 import { auth } from "@clerk/nextjs";
 import { Metadata } from "next";
-import { columns } from "./columns";
-import { DataTable } from "./data-table";
 import ClientSideTable from "@/components/ClientSideTable";
 
 export const metadata: Metadata = {
@@ -23,11 +21,17 @@ export default async function NotesPage() {
   });
 
   return (
-    <div className="w-full">
-      {/* {allNotes.map((note) => (
-        <Note note={note} key={note.id} />
-      ))} */}
-      <ClientSideTable notes={allNotes} />
+    <div className="w-full overflow-x-auto">
+      <div className="min-w-full sm:min-w-0">
+        <div className="block sm:hidden">
+          {allNotes.map((note) => (
+            <Note note={note} key={note.id} />
+          ))}
+        </div>
+        <div className="hidden sm:block">
+          <ClientSideTable notes={allNotes} />
+        </div>
+      </div>
     </div>
   );
 }

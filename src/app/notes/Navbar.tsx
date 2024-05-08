@@ -39,10 +39,10 @@ export default function Navbar() {
             />
             <ThemeToggleButton />
             <AIChatButton />
-            <Button onClick={() => setShowCreateCategoryDialog(true)}>
+            {/* <Button onClick={() => setShowCreateCategoryDialog(true)}>
               <Plus size={20} className="mr-2" />
               Category
-            </Button>
+            </Button> */}
             <Button onClick={() => setShowAddEditNoteDialog(true)}>
               <Plus size={20} className="mr-2" />
               Note

@@ -1,6 +1,6 @@
 import React from "react";
-import { Button } from "./ui/button"; // Make sure this path is correct
-import { Dialog, DialogContent, DialogHeader, DialogTitle } from "./ui/dialog"; // Make sure this path is correct
+import { Button } from "./ui/button";
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from "./ui/dialog";
 
 interface NoteModalProps {
   content: string;

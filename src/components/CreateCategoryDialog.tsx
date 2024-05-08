@@ -54,11 +54,9 @@ export default function CreateCategoryDialog({
       });
 
       if (response.ok) {
-        // Extract the new category from the response
         const result = await response.json();
         const newCategory = result.category;
 
-        // Add the new category to the existing categories array
         setCategories((currentCategories) => [
           ...currentCategories,
           newCategory,
@@ -109,7 +107,7 @@ export default function CreateCategoryDialog({
       <DialogHeader>
         <DialogTitle>Create New Category</DialogTitle>
       </DialogHeader>
-      <DialogContent>
+      <DialogContent className="max-h-[80vh] w-[90%] max-w-[500px] overflow-auto p-6">
         <form onSubmit={handleSubmit(onSubmit)} className="mt-5 space-y-4">
           <Input
             {...register("name", { required: true })}

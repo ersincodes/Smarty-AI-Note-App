@@ -6,6 +6,7 @@ import { ClerkProvider } from "@clerk/nextjs";
 import "./globals.css";
 import { ThemeProvider } from "./ThemeProvider";
 import ThemeToggleButton from "@/components/ThemeToggleButton";
+import { CategoriesProvider } from "@/context/CategoriesContext";
 
 const montserrat = Montserrat({
   weight: ["400", "500", "600", "700"],
@@ -26,7 +27,9 @@ export default function RootLayout({
     <ClerkProvider>
       <html lang="en">
         <body className={montserrat.className}>
-          <ThemeProvider attribute="class">{children}</ThemeProvider>
+          <ThemeProvider attribute="class">
+            <CategoriesProvider>{children}</CategoriesProvider>
+          </ThemeProvider>
         </body>
       </html>
     </ClerkProvider>

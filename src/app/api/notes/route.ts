@@ -27,27 +27,18 @@ export async function POST(req: Request) {
       return Response.json({ error: "Unauthorized" }, { status: 400 });
     }
 
-    const embedding = await getEmbeddingForNote(title, content);
-
-    const note = await prisma.$transaction(async (tx) => {
-      const note = await tx.note.create({
-        data: {
-          title,
-          content,
-          userId,
-          categoryId,
-        },
-      });
-
-      await notesIndex.upsert([
-        {
-          id: note.id,
-          values: embedding,
-          metadata: { userId },
-        },
-      ]);
-      return note;
+    // Create note first without waiting for embedding
+    const note = await prisma.note.create({
+      data: {
+        title,
+        content,
+        userId,
+        categoryId,
+      },
     });
+
+    // Generate embedding in the background
+    generateEmbeddingAndUpsert(note.id, title, content, userId);
 
     return Response.json({ note }, { status: 201 });
   } catch (error) {
@@ -81,19 +72,16 @@ export async function PUT(req: Request) {
       return Response.json({ error: "Unauthorized" }, { status: 400 });
     }
 
-    const embedding = await getEmbeddingForNote(title, content);
-
-    const updatedNote = await prisma.$transaction(async (tx) => {
-      const updatedNote = await tx.note.update({
-        where: { id },
-        data: { title, content, categoryId },
-      });
-      await notesIndex.upsert([
-        { id, values: embedding, metadata: { userId } },
-      ]);
-      return updatedNote;
+    // Update note without waiting for embedding
+    const updatedNote = await prisma.note.update({
+      where: { id },
+      data: { title, content, categoryId },
     });
-    return Response.json({ note }, { status: 200 });
+
+    // Generate embedding in the background
+    generateEmbeddingAndUpsert(id, title, content, userId);
+
+    return Response.json({ note: updatedNote }, { status: 200 });
   } catch (error) {
     console.error(error);
     return Response.json({ error: "Internal server error" }, { status: 500 });
@@ -139,4 +127,27 @@ export async function DELETE(req: Request) {
 
 async function getEmbeddingForNote(title: string, content: string | undefined) {
   return getEmbedding(title + "\n\n" + (content || ""));
+}
+
+// Background function to generate embedding and upsert to Pinecone
+async function generateEmbeddingAndUpsert(
+  noteId: string,
+  title: string,
+  content: string | undefined,
+  userId: string,
+) {
+  try {
+    const embedding = await getEmbeddingForNote(title, content);
+    await notesIndex.upsert([
+      {
+        id: noteId,
+        values: embedding,
+        metadata: { userId },
+      },
+    ]);
+  } catch (error) {
+    console.error("Error generating embedding:", error);
+    // We don't want to fail the main operation if embedding fails
+    // Could implement a retry mechanism or queue system for production
+  }
 }

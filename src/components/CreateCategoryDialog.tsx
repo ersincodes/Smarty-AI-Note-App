@@ -4,6 +4,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle } from "./ui/dialog"; 
 import { useForm } from "react-hook-form";
 import { Button } from "./ui/button";
 import LoadingButton from "./ui/loading-button";
+import { useCategories } from "@/context/CategoriesContext";
 
 interface CreateCategoryDialogProps {
   open: boolean;
@@ -14,34 +15,19 @@ interface CategoryFormData {
   name: string;
 }
 
-interface Category {
-  id: string;
-  name: string;
-}
-
 export default function CreateCategoryDialog({
   open,
   setOpen,
 }: CreateCategoryDialogProps) {
-  const [categories, setCategories] = useState<Category[]>([]);
+  const {
+    categories,
+    loading: categoriesLoading,
+    refreshCategories,
+  } = useCategories();
   const { register, handleSubmit, reset } = useForm<CategoryFormData>();
   const [deleteInProgress, setDeleteInProgress] = useState<{
     [key: string]: boolean;
   }>({});
-
-  useEffect(() => {
-    if (open) {
-      const fetchCategories = async () => {
-        const response = await fetch("/api/categories");
-        if (response.ok) {
-          const data = await response.json();
-          setCategories(data.categories);
-        }
-      };
-
-      fetchCategories();
-    }
-  }, [open]);
 
   const onSubmit = async (data: CategoryFormData) => {
     try {
@@ -54,23 +40,17 @@ export default function CreateCategoryDialog({
       });
 
       if (response.ok) {
-        const result = await response.json();
-        const newCategory = result.category;
-
-        setCategories((currentCategories) => [
-          ...currentCategories,
-          newCategory,
-        ]);
+        refreshCategories();
+        reset(); // Reset form fields
       } else {
         throw new Error("Failed to create category");
       }
-
-      reset(); // Reset form fields
     } catch (error) {
       console.error("Failed to create category", error);
       // Optionally, display an error message
     }
   };
+
   const handleDeleteCategory = async (categoryId: string) => {
     // Confirm deletion with the user
     if (!confirm("Are you sure you want to delete this category?")) return;
@@ -90,10 +70,7 @@ export default function CreateCategoryDialog({
         throw new Error(`Error ${response.status}: ${errorText}`);
       }
 
-      // Remove the deleted category from the state
-      setCategories((currentCategories) =>
-        currentCategories.filter((category) => category.id !== categoryId),
-      );
+      refreshCategories();
     } catch (error) {
       console.error(error);
       alert("Something went wrong, please try again.");
@@ -121,24 +98,28 @@ export default function CreateCategoryDialog({
           <h1 className="mb-3 border-b border-current font-bold">
             Existing Categories
           </h1>
-          <ul className="mt-4">
-            {categories.map((category) => (
-              <li
-                key={category.id}
-                className="mt-4 flex items-center justify-between"
-              >
-                {category.name}
-                <LoadingButton
-                  onClick={() => handleDeleteCategory(category.id)}
-                  loading={deleteInProgress[category.id]}
-                  disabled={deleteInProgress[category.id]}
-                  variant="destructive"
+          {categoriesLoading ? (
+            <p className="mt-4">Loading categories...</p>
+          ) : (
+            <ul className="mt-4">
+              {categories.map((category) => (
+                <li
+                  key={category.id}
+                  className="mt-4 flex items-center justify-between"
                 >
-                  Delete
-                </LoadingButton>
-              </li>
-            ))}
-          </ul>
+                  {category.name}
+                  <LoadingButton
+                    onClick={() => handleDeleteCategory(category.id)}
+                    loading={deleteInProgress[category.id]}
+                    disabled={deleteInProgress[category.id]}
+                    variant="destructive"
+                  >
+                    Delete
+                  </LoadingButton>
+                </li>
+              ))}
+            </ul>
+          )}
         </div>
       </DialogContent>
     </Dialog>

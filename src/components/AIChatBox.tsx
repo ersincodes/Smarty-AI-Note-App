@@ -96,7 +96,9 @@ export default function AIChatBox({ open, onClose }: AIChatBoxProps) {
             placeholder="Ask anything..."
             ref={inputRef}
           />
-          <Button type="submit">Send</Button>
+          <Button className="ml-1" type="submit">
+            Send
+          </Button>
         </form>
       </div>
     </div>

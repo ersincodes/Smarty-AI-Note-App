@@ -10,7 +10,7 @@ import { columns } from "../app/notes/columns";
 import AddEditNoteDialog from "@/components/AddEditNoteDialog";
 import { NoteWithCategory } from "@/components/Note";
 import { Button } from "./ui/button";
-import { PencilIcon } from "lucide-react";
+import { FileEdit } from "lucide-react";
 import NoteModal from "./NoteModal";
 
 interface ClientSideTableProps {
@@ -47,7 +47,7 @@ const ClientSideTable: React.FC<ClientSideTableProps> = ({ notes }) => {
     cell: ({ row }: CellContext<NoteWithCategory, unknown>) => (
       <>
         <Button onClick={() => handleEdit(row.original)}>
-          <PencilIcon name="edit" />
+          <FileEdit size={18} />
         </Button>
       </>
     ),

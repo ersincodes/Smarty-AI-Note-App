@@ -34,6 +34,7 @@ import {
 } from "@/components/ui/select";
 import { SelectLabel } from "@radix-ui/react-select";
 import { Controller } from "react-hook-form";
+import { useCategories } from "@/context/CategoriesContext";
 
 interface AddEditNoteDialogProps {
   open: boolean;
@@ -47,7 +48,11 @@ export default function AddEditNoteDialog({
   noteToEdit,
 }: AddEditNoteDialogProps) {
   const [deleteInProgress, setDeleteInProgress] = useState(false);
-  const [categories, setCategories] = useState<Category[]>([]);
+  const {
+    categories,
+    loading: categoriesLoading,
+    refreshCategories,
+  } = useCategories();
 
   const router = useRouter();
 
@@ -90,6 +95,7 @@ export default function AddEditNoteDialog({
         form.reset();
       }
       router.refresh();
+      refreshCategories();
       setOpen(false);
     } catch (error) {
       console.error(error);
@@ -121,20 +127,6 @@ export default function AddEditNoteDialog({
     }
   }
 
-  useEffect(() => {
-    const fetchCategories = async () => {
-      const response = await fetch("/api/categories");
-      if (response.ok) {
-        const data = await response.json();
-        setCategories(data.categories);
-      }
-    };
-
-    if (open) {
-      fetchCategories();
-    }
-  }, [open]);
-
   return (
     <div className="flex max-h-full flex-col">
       <Dialog open={open} onOpenChange={setOpen}>
@@ -155,9 +147,16 @@ export default function AddEditNoteDialog({
                           field.onChange(value === "none" ? null : value);
                         }}
                         value={field.value || "none"}
+                        disabled={categoriesLoading}
                       >
                         <SelectTrigger className="w-full">
-                          <SelectValue placeholder="Select a category" />
+                          <SelectValue
+                            placeholder={
+                              categoriesLoading
+                                ? "Loading categories..."
+                                : "Select a category"
+                            }
+                          />
                         </SelectTrigger>
                         <SelectContent>
                           <SelectGroup>
